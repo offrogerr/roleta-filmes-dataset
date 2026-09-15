@@ -1,0 +1,33 @@
+name: Atualizar Top 250 IMDb
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependências
+        run: pip install pandas
+
+      - name: Rodar o script de geração
+        run: python gerar_top250_auto.py
+
+      - name: Commitar o resultado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add top250_imdb.json
+          git diff --staged --quiet && echo "Nada mudou" || git commit -m "Atualiza Top 250 automaticamente"
+          git push
